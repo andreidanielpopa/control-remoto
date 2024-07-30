@@ -3,6 +3,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const robot = require('robotjs');
 const loudness = require('loudness'); // Importar la librería loudness
+const os = require('os'); // Importar el módulo os
 
 const app = express();
 const server = http.createServer(app);
@@ -45,11 +46,38 @@ io.on('connection', (socket) => {
 
   // Nuevo evento para cambiar el volumen
   socket.on('setVolume', (volume) => {
+    const platform = os.platform();
+    console.log(`Plataforma detectada: ${platform}`);
+
+    // Ajustar el volumen según la plataforma
     loudness.setVolume(volume).then(() => {
       console.log(`El volumen se ha establecido al ${volume}%`);
       socket.emit('volumeChanged', volume); // Notificar al cliente que el volumen ha cambiado
     }).catch((err) => {
       console.error('Error al cambiar el volumen:', err);
+
+      // Salida adicional para depuración
+      const { command, exitCode, stdout, stderr } = err;
+      console.error('Comando:', command);
+      console.error('Código de salida:', exitCode);
+      console.error('Salida estándar:', stdout);
+      console.error('Error estándar:', stderr);
+
+      // Intentar con un comando específico para Linux si estamos en Linux
+      if (platform === 'linux') {
+        const exec = require('child_process').exec;
+        const command = `amixer set IEC958 ${volume}%`;
+
+        exec(command, (error, stdout, stderr) => {
+          if (error) {
+            console.error(`Error al ejecutar el comando amixer: ${error.message}`);
+            console.error(`stderr: ${stderr}`);
+          } else {
+            console.log(`El volumen se ha establecido al ${volume}% utilizando amixer`);
+            socket.emit('volumeChanged', volume);
+          }
+        });
+      }
     });
   });
 
