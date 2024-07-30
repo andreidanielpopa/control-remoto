@@ -78,9 +78,6 @@
 
     const touchpad = document.getElementById('touchpad');
     const textInput = document.getElementById('textInput');
-    const volumeDisplay = document.getElementById('volumeDisplay');
-    const volumeUp = document.getElementById('volumeUp');
-    const volumeDown = document.getElementById('volumeDown');
     let isTouching = false;
     let startX, startY;
     const multiplier = 2.5; // Ajusta este valor para cambiar la velocidad del ratón
@@ -118,13 +115,14 @@
         socket.emit('keyPress', key);
         event.preventDefault(); // Prevent default behavior for these keys
       } else {
+        // Add a delay before sending the character
         setTimeout(() => {
           const text = textInput.value;
           if (text) {
             socket.emit('textInput', text);
             textInput.value = ''; // Clear the input field after sending
           }
-        }, 5); // Adjust the delay if necessary
+        }, 50); // Adjust the delay if necessary
       }
     });
 
