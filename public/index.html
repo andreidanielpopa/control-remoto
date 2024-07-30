@@ -6,14 +6,14 @@
   <title>Remote Mouse</title>
   <style>
     html, body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden; /* Desactiva el scroll en la página completa */
-        height: 100%; /* Asegura que el contenedor ocupa toda la altura disponible */
-        -webkit-user-select: none; /* Desactiva la selección de texto */
-        -webkit-touch-callout: none; /* Desactiva el menú emergente en dispositivos móviles */
-        user-select: none; /* Para navegadores que no usan WebKit */
-      }
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Desactiva el scroll en la página completa */
+      height: 100%; /* Asegura que el contenedor ocupa toda la altura disponible */
+      -webkit-user-select: none; /* Desactiva la selección de texto */
+      -webkit-touch-callout: none; /* Desactiva el menú emergente en dispositivos móviles */
+      user-select: none; /* Para navegadores que no usan WebKit */
+    }
     body { 
       font-family: Arial, sans-serif; 
       margin: 0; 
@@ -43,17 +43,44 @@
       border: 2px solid #aaa;
       border-radius: 5px;
     }
+    #volumeControl {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    #volumeControl button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 16px;
+      border: 2px solid #aaa;
+      border-radius: 5px;
+      background: #fff;
+      cursor: pointer;
+    }
+    #volumeDisplay {
+      font-size: 16px;
+      width: 50px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <div id="touchpad"></div>
   <input id="textInput" type="text" placeholder="Enter text here"/>
+  <div id="volumeControl">
+    <button id="volumeDown">-</button>
+    <span id="volumeDisplay">50</span> <!-- Volumen inicial -->
+    <button id="volumeUp">+</button>
+  </div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
 
     const touchpad = document.getElementById('touchpad');
     const textInput = document.getElementById('textInput');
+    const volumeDisplay = document.getElementById('volumeDisplay');
+    const volumeUp = document.getElementById('volumeUp');
+    const volumeDown = document.getElementById('volumeDown');
     let isTouching = false;
     let startX, startY;
     const multiplier = 2.5; // Ajusta este valor para cambiar la velocidad del ratón
@@ -92,18 +119,44 @@
         event.preventDefault(); // Prevent default behavior for these keys
       } else {
         // Add a delay before sending the character
-        setTimeout(() => {
-          const text = textInput.value;
-          if (text) {
-            socket.emit('textInput', text);
-            textInput.value = ''; // Clear the input field after sending
-          }
-        }, 50); // Adjust the delay if necessary
+        const text = textInput.value;
+        if (text) {
+          socket.emit('textInput', text);
+          textInput.value = ''; // Clear the input field after sending
+        }
       }
     });
 
     textInput.addEventListener('input', () => {
       // Do nothing, handle input via keydown
+    });
+
+    // Control de volumen
+    let currentVolume = 50; // Volumen inicial, debe coincidir con el valor mostrado
+
+    const updateVolumeDisplay = (volume) => {
+      volumeDisplay.textContent = volume;
+    };
+
+    volumeUp.addEventListener('click', () => {
+      if (currentVolume < 100) {
+        currentVolume += 10;
+        socket.emit('setVolume', currentVolume);
+        updateVolumeDisplay(currentVolume);
+      }
+    });
+
+    volumeDown.addEventListener('click', () => {
+      if (currentVolume > 0) {
+        currentVolume -= 10;
+        socket.emit('setVolume', currentVolume);
+        updateVolumeDisplay(currentVolume);
+      }
+    });
+
+    socket.on('volumeChanged', (volume) => {
+      currentVolume = volume;
+      updateVolumeDisplay(volume);
     });
   </script>
 </body>

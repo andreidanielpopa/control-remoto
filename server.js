@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const robot = require('robotjs');
+const loudness = require('loudness'); // Importar la librería loudness
 
 const app = express();
 const server = http.createServer(app);
@@ -40,6 +41,16 @@ io.on('connection', (socket) => {
     } else {
       robot.keyTap(key.toLowerCase());
     }
+  });
+
+  // Nuevo evento para cambiar el volumen
+  socket.on('setVolume', (volume) => {
+    loudness.setVolume(volume).then(() => {
+      console.log(`El volumen se ha establecido al ${volume}%`);
+      socket.emit('volumeChanged', volume); // Notificar al cliente que el volumen ha cambiado
+    }).catch((err) => {
+      console.error('Error al cambiar el volumen:', err);
+    });
   });
 
   socket.on('disconnect', () => {
