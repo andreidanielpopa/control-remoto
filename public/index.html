@@ -118,12 +118,13 @@
         socket.emit('keyPress', key);
         event.preventDefault(); // Prevent default behavior for these keys
       } else {
-        // Add a delay before sending the character
-        const text = textInput.value;
-        if (text) {
-          socket.emit('textInput', text);
-          textInput.value = ''; // Clear the input field after sending
-        }
+        setTimeout(() => {
+          const text = textInput.value;
+          if (text) {
+            socket.emit('textInput', text);
+            textInput.value = ''; // Clear the input field after sending
+          }
+        }, 5); // Adjust the delay if necessary
       }
     });
 
