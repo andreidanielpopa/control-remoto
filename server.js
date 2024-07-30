@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const robot = require('robotjs');
-const loudness = require('loudness'); // Importar la librería loudness
+const loudness = require('loudness'); 
 const { exec } = require('child_process');
 const os = require('os');
 

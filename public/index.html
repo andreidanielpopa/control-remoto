@@ -48,7 +48,7 @@
       align-items: center;
       margin-bottom: 20px;
     }
-    #volumeControl button {
+    button {
       padding: 10px 20px;
       margin: 0 10px;
       font-size: 16px;
@@ -69,7 +69,7 @@
   <input id="textInput" type="text" placeholder="Enter text here"/>
   <div id="volumeControl">
     <button id="volumeDown">-</button>
-    <span id="volumeDisplay">50</span> <!-- Volumen inicial -->
+    <span id="volumeDisplay">60</span> <!-- Volumen inicial -->
     <button id="volumeUp">+</button>
   </div>
   <script src="/socket.io/socket.io.js"></script>
@@ -131,7 +131,7 @@
     });
 
     // Control de volumen
-    let currentVolume = 50; // Volumen inicial, debe coincidir con el valor mostrado
+    let currentVolume = 60; // Volumen inicial, debe coincidir con el valor mostrado
 
     const updateVolumeDisplay = (volume) => {
       volumeDisplay.textContent = volume;
@@ -139,7 +139,7 @@
 
     volumeUp.addEventListener('click', () => {
       if (currentVolume < 100) {
-        currentVolume += 10;
+        currentVolume += 5;
         socket.emit('setVolume', currentVolume);
         updateVolumeDisplay(currentVolume);
       }
@@ -147,7 +147,7 @@
 
     volumeDown.addEventListener('click', () => {
       if (currentVolume > 0) {
-        currentVolume -= 10;
+        currentVolume -= 5;
         socket.emit('setVolume', currentVolume);
         updateVolumeDisplay(currentVolume);
       }
