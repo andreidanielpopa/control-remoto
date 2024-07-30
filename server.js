@@ -3,6 +3,8 @@ const http = require('http');
 const socketIo = require('socket.io');
 const robot = require('robotjs');
 const loudness = require('loudness'); // Importar la librería loudness
+const { exec } = require('child_process');
+const os = require('os');
 
 const app = express();
 const server = http.createServer(app);
@@ -43,14 +45,27 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Nuevo evento para cambiar el volumen
   socket.on('setVolume', (volume) => {
-    loudness.setVolume(volume).then(() => {
-      console.log(`El volumen se ha establecido al ${volume}%`);
-      socket.emit('volumeChanged', volume); // Notificar al cliente que el volumen ha cambiado
-    }).catch((err) => {
-      console.error('Error al cambiar el volumen:', err);
-    });
+    if (os.platform() === 'win32') {
+      // En Windows
+      loudness.setVolume(volume).then(() => {
+        console.log(`El volumen se ha establecido al ${volume}%`);
+        socket.emit('volumeChanged', volume); // Notificar al cliente que el volumen ha cambiado
+      }).catch((err) => {
+        console.error('Error al cambiar el volumen:', err);
+      });
+    } else if (os.platform() === 'linux') {
+      // En Ubuntu (Linux)
+      const command = `pactl set-sink-volume @DEFAULT_SINK@ ${volume}%`;
+      exec(command, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error al cambiar el volumen: ${error}`);
+          return;
+        }
+        console.log(`El volumen se ha establecido al ${volume}%`);
+        socket.emit('volumeChanged', volume); // Notificar al cliente que el volumen ha cambiado
+      });
+    }
   });
 
   socket.on('disconnect', () => {
