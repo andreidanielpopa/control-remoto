@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Remote Mouse</title>
   <style>
     html, body {
@@ -13,6 +13,7 @@
       -webkit-user-select: none; /* Desactiva la selección de texto */
       -webkit-touch-callout: none; /* Desactiva el menú emergente en dispositivos móviles */
       user-select: none; /* Para navegadores que no usan WebKit */
+      touch-action: pan-x pan-y;
     }
     body { 
       font-family: Arial, sans-serif; 
@@ -62,11 +63,27 @@
       width: 50px;
       text-align: center;
     }
+    #arrowControls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .arrowButton {
+      width: 60px;
+      height: 60px;
+      font-size: 24px;
+      margin: 5px;
+    }
   </style>
 </head>
 <body>
   <div id="touchpad"></div>
   <input id="textInput" type="text" placeholder="Enter text here"/>
+  <div id="arrowControls">
+    <button id="arrowUp" class="arrowButton">↑</button>
+    <button id="arrowDown" class="arrowButton">↓</button>
+  </div>
   <div id="volumeControl">
     <button id="volumeDown">-</button>
     <span id="volumeDisplay">60</span> <!-- Volumen inicial -->
@@ -78,9 +95,16 @@
 
     const touchpad = document.getElementById('touchpad');
     const textInput = document.getElementById('textInput');
+    const volumeUp = document.getElementById('volumeUp');
+    const volumeDown = document.getElementById('volumeDown');
+    const volumeDisplay = document.getElementById('volumeDisplay');
+    const arrowUp = document.getElementById('arrowUp');
+    const arrowDown = document.getElementById('arrowDown');
+    
     let isTouching = false;
     let startX, startY;
     const multiplier = 2.5; // Ajusta este valor para cambiar la velocidad del ratón
+    let currentVolume = 60; // Volumen inicial, debe coincidir con el valor mostrado
 
     touchpad.addEventListener('touchstart', (event) => {
       const touch = event.touches[0];
@@ -131,8 +155,6 @@
     });
 
     // Control de volumen
-    let currentVolume = 60; // Volumen inicial, debe coincidir con el valor mostrado
-
     const updateVolumeDisplay = (volume) => {
       volumeDisplay.textContent = volume;
     };
@@ -157,6 +179,16 @@
       currentVolume = volume;
       updateVolumeDisplay(volume);
     });
+
+    // Control de flechas
+    arrowUp.addEventListener('click', () => {
+      socket.emit('keyPress', 'up');
+    });
+
+    arrowDown.addEventListener('click', () => {
+      socket.emit('keyPress', 'down');
+    });
+
   </script>
 </body>
 </html>

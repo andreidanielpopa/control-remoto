@@ -65,7 +65,7 @@ io.on('connection', (socket) => {
         console.log(`El volumen se ha establecido al ${volume}%`);
         socket.emit('volumeChanged', volume); // Notificar al cliente que el volumen ha cambiado
       });
-    }
+    } 
   });
 
   socket.on('disconnect', () => {
